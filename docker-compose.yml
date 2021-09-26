@@ -52,6 +52,33 @@ services:
       - HASURA_GRAPHQL_ADMIN_SECRET=${ADMIN_SECRET:-changeme}
       - HASURA_GRAPHQL_UNAUTHORIZED_ROLE=user
 
+  backup:
+    container_name: backup
+    image: prodrigestivill/postgres-backup-local
+    restart: always
+    user: postgres:postgres # Optional: see below
+    volumes:
+      - /foo/backups:/backups
+    links:
+      - db
+    depends_on:
+      - db
+    #ports:
+    #  - 8082:8082
+    environment:
+      - TZ=Europe/Paris
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=dipdup
+      - POSTGRES_USER=dipdup
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_EXTRA_OPTS=-Z6 --clean --schema=hic_et_nunc --blobs
+      - SCHEDULE=*/30 * * * *
+      - BACKUP_KEEP_DAYS=7
+      - BACKUP_KEEP_WEEKS=4
+      - BACKUP_KEEP_MONTHS=6
+      - HEALTHCHECK_PORT=8082
+      
   caddy:
     image: caddy:2.4.0-alpine
     depends_on:
