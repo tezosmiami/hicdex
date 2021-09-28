@@ -110,7 +110,7 @@ class Index:
             )
 
         elif state.index_hash != index_config_hash:
-            self._logger.warning('Config hash mismatch (config has been changed), reindexing')
+            self._logger.error('Config hash mismatch (config has been changed), reload from backup!')
             # await self._ctx.reindex()
 
         self._logger.info('%s', f'{state.level=} {state.hash=}'.replace('state.', ''))
@@ -118,7 +118,7 @@ class Index:
         if state.level and state.hash:
             block = await self._datasource.get_block(state.level)
             if state.hash != block.hash:
-                self._logger.warning('Block hash mismatch (missed rollback while dipdup was stopped), reindexing')
+                self._logger.error('Block hash mismatch (missed rollback while dipdup was stopped), reload from backup!')
                 # await self._ctx.reindex()
 
         await state.save()
@@ -217,7 +217,7 @@ class OperationIndex(Index):
             received_hashes = set([op.hash for op in operations])
             reused_hashes = received_hashes & expected_hashes
             if reused_hashes != expected_hashes:
-                self._logger.warning('Attempted a single level rollback, but arrived block differs from processed one')
+                self._logger.error('Attempted a single level rollback, but arrived block differs from processed one, reload from backup!')
                 #await self._ctx.reindex()
 
             self._rollback_level = None

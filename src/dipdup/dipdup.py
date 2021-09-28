@@ -303,7 +303,7 @@ class DipDup:
             await Tortoise._connections['default'].execute_script(f"SET search_path TO {self._config.database.schema_name}")
 
         if reindex:
-            self._logger.warning('Started with `--reindex` argument, reindexing')
+            self._logger.warning('Started with `--reindex` argument, reindexing - IGNORED')
             #await self._ctx.reindex()
 
         self._logger.info('Checking database schema')
@@ -335,7 +335,7 @@ class DipDup:
             )
             await schema_state.save()
         elif schema_state.index_hash != schema_hash:
-            self._logger.warning('Schema hash mismatch, reindexing')
+            self._logger.error('Schema hash mismatch detected, - IGNORED')
             # await self._ctx.reindex()
 
         await self._execute_sql_scripts(reindex=False)
