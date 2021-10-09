@@ -2,12 +2,15 @@ import logging
 
 import aiohttp
 
+import json
+
 _logger = logging.getLogger(__name__)
 
-
 def clean_null_bytes(string: str) -> str:
-    return ''.join(string.split('\x00'))
-
+    if type(string) is dict:
+         return json.dumps(string)
+    else:
+        return ''.join(string.split('\x00'))
 
 def fromhex(hexbytes: str) -> str:
     string = ''
