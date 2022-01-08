@@ -37,4 +37,4 @@ async def http_request(session: aiohttp.ClientSession, method: str, **kwargs):
         headers=headers,
         **kwargs,
     ) as response:
-        return await response.json()
+        return await response.json(content_type=None)
