@@ -15,6 +15,9 @@ contracts:
   HEN_swap_v2:
     address: KT1HbQepzV1nVGg8QVznG7z4RcHseD5kwqBn
     typename: hen_swap_v2
+  HENC_swap:
+    address: KT1PHubm9HtyQEJ4BBpMTVomq6mhbfNZ9z5w
+    typename: henc_swap
   HEN_subjkts:
     address: KT1My1wDZHDGweCrJnQJi3wcFaS67iksirvj
     typename: hen_subjkt
@@ -73,6 +76,7 @@ indexes:
     contracts:
       - HEN_swap_v1
       - HEN_swap_v2
+      - HENC_swap
       - HEN_objkts
       - HEN_subjkts
       - HDAO_curation
@@ -119,6 +123,23 @@ indexes:
         pattern:
           - type: transaction
             destination: HEN_swap_v2
+            entrypoint: collect
+
+      # marketplace henc
+      - callback: on_swap_henc
+        pattern:
+          - type: transaction
+            destination: HENC_swap
+            entrypoint: swap
+      - callback: on_cancel_swap_henc
+        pattern:
+          - type: transaction
+            destination: HENC_swap
+            entrypoint: cancel_swap
+      - callback: on_collect_henc
+        pattern:
+          - type: transaction
+            destination: HENC_swap
             entrypoint: collect
 
       # fa2
