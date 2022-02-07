@@ -48,4 +48,4 @@ async def on_mint(
     await seller_holding.save()
 
     await fix_token_metadata(token)
-    #await fix_other_metadata()
+    await fix_other_metadata()
