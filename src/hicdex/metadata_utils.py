@@ -18,6 +18,7 @@ try:
     with open(f'{METADATA_PATH}/broken.json') as broken_list:
         broken_ids = json.load(broken_list)
 except:
+    print(f'Unable to load {METADATA_PATH}/broken.json')
     pass
 
 
@@ -36,13 +37,15 @@ async def fix_token_metadata(token):
 
 
 async def fix_other_metadata():
-    tokens = await models.Token.filter(Q(artifact_uri='') & ~Q(id__in=broken_ids)).all().order_by('id').limit(30)
-    for token in tokens:
+    async for token in models.Token.filter(
+        Q(artifact_uri='') & ~Q(id__in=broken_ids)
+    ).order_by('id'):
         fixed = await fix_token_metadata(token)
         if fixed:
             _logger.info(f'fixed metadata for {token.id}')
         else:
             _logger.info(f'failed to fix metadata for {token.id}')
+            broken_ids.append(token.id)
 
 
 async def add_tags(token, metadata):
