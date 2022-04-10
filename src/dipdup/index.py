@@ -385,7 +385,12 @@ class OperationIndex(Index):
             index_config=self._config,
         )
 
-        await handler_config.callback_fn(handler_context, *args)
+        # Disable exceptions temporarialy. TODO: Upgrade to DipDup5
+        try:   
+            await handler_config.callback_fn(handler_context, *args)
+            pass
+        except:
+            pass
 
         end = time.perf_counter()
         self._logger.debug(f'{handler_config.callback}` handler executed in {end - start:.3f}s')
