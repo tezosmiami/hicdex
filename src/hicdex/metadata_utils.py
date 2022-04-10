@@ -66,7 +66,7 @@ async def get_subjkt_metadata(holder):
         with open(subjkt_path(holder.address)) as json_file:
             metadata = json.load(json_file)
             failed_attempt = metadata.get('__failed_attempt')
-            if failed_attempt and failed_attempt > 10:
+            if failed_attempt and failed_attempt > 1:
                 return {}
             if not failed_attempt:
                 return metadata
@@ -84,7 +84,7 @@ async def get_metadata(token):
         with open(file_path(token.id)) as json_file:
             metadata = json.load(json_file)
             failed_attempt = metadata.get('__failed_attempt')
-            if failed_attempt and failed_attempt > 10:
+            if failed_attempt and failed_attempt > 1:
                 return {}
             if not failed_attempt:
                 return metadata
