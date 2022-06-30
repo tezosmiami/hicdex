@@ -1,6 +1,7 @@
-import hicdex.models as models
 from dipdup.context import HandlerContext
 from dipdup.models import Origination
+
+import hicdex.models as models
 from hicdex.types.split_contract_a.storage import SplitContractAStorage
 
 
@@ -21,7 +22,7 @@ async def on_split_contract_origination_a(
     core_participants = split_contract_a_origination.storage.coreParticipants
 
     holder, _ = await models.Holder.get_or_create(address=contract_address)
-    holder.is_split = True  # type: ignore
+    holder.is_split = True
     await holder.save()
     contract, _ = await models.SplitContract.get_or_create(contract=holder, administrator=administrator, total_shares=total_shares)
 

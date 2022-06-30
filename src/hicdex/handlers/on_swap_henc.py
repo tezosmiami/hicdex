@@ -1,11 +1,8 @@
-from typing import Optional
-
-from dipdup.models import Transaction
 from dipdup.context import HandlerContext
-from hicdex.metadata_utils import fix_other_metadata, fix_token_metadata
+from dipdup.models import Transaction
 
 import hicdex.models as models
-
+from hicdex.metadata_utils import fix_other_metadata, fix_token_metadata
 from hicdex.types.henc_swap.parameter.swap import SwapParameter
 from hicdex.types.henc_swap.storage import HencSwapStorage
 
@@ -19,10 +16,10 @@ async def on_swap_henc(
     swap_id = int(swap.storage.counter) - 1
     fa2, _ = await models.FA2.get_or_create(contract=swap.parameter.fa2)
 
-    is_valid = swap.parameter.creator == token.creator_id and int(swap.parameter.royalties) == int(token.royalties)  # type: ignore
+    is_valid = swap.parameter.creator == token.creator_id and int(swap.parameter.royalties) == int(token.royalties)
 
     swap_model = models.Swap(
-        id=swap_id,  # type: ignore
+        id=swap_id,
         creator=holder,
         token=token,
         price=swap.parameter.xtz_per_objkt,
@@ -36,7 +33,7 @@ async def on_swap_henc(
         royalties=swap.parameter.royalties,
         fa2=fa2,
         contract_address=swap.data.target_address,
-        contract_version=3, # the contract id (NOT THE VERSION ;-))
+        contract_version=3,  # the contract id (NOT THE VERSION ;-))
         is_valid=is_valid,
     )
     await swap_model.save()

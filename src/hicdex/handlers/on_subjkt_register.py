@@ -1,9 +1,10 @@
 import logging
 from typing import Dict
 
-import hicdex.models as models
 from dipdup.context import HandlerContext
 from dipdup.models import Transaction
+
+import hicdex.models as models
 from hicdex.metadata_utils import get_subjkt_metadata
 from hicdex.types.hen_subjkt.parameter.registry import RegistryParameter
 from hicdex.types.hen_subjkt.storage import HenSubjktStorage
@@ -23,16 +24,17 @@ async def on_subjkt_register(
     metadata_file = fromhex(registry.parameter.metadata)
     metadata: Dict[str, str] = {}
 
-    holder.name = name  # type: ignore
-    holder.metadata_file = metadata_file  # type: ignore
-    holder.metadata = metadata  # type: ignore
+    holder.name = name
+    holder.metadata_file = metadata_file
+    holder.metadata = metadata
 
     try:
         if metadata_file.startswith('ipfs://'):
             _logger.info("Fetching IPFS metadata")
             holder.metadata = await get_subjkt_metadata(holder)
-    except:
-        pass
-    holder.description = holder.metadata.get('description', '')  # type: ignore
+    except Exception as exc:
+        ctx.logger.error('Failed to fetch metadata for %s: %s', holder.address, exc)
+
+    holder.description = holder.metadata.get('description', '')
 
     await holder.save()

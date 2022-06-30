@@ -1,6 +1,7 @@
-import hicdex.models as models
 from dipdup.context import HandlerContext
 from dipdup.models import Transaction
+
+import hicdex.models as models
 from hicdex.types.objktbid_marketplace.parameter.ask import AskParameter
 from hicdex.types.objktbid_marketplace.storage import ObjktbidMarketplaceStorage
 
@@ -17,7 +18,7 @@ async def on_create_ask(
         artist, _ = await models.Holder.get_or_create(address=ask.parameter.artist)
 
     ask_model = models.Ask(
-        id=int(ask.storage.ask_id) - 1,  # type: ignore
+        id=int(ask.storage.ask_id) - 1,
         creator=creator,
         objkt_id=ask.parameter.objkt_id,
         fa2=fa2,

@@ -1,6 +1,7 @@
-import hicdex.models as models
 from dipdup.context import HandlerContext
 from dipdup.models import Transaction
+
+import hicdex.models as models
 from hicdex.metadata_utils import fix_other_metadata, fix_token_metadata
 from hicdex.types.hen_minter.parameter.swap import SwapParameter
 from hicdex.types.hen_minter.storage import HenMinterStorage
@@ -15,7 +16,7 @@ async def on_swap(
     fa2, _ = await models.FA2.get_or_create(contract='KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton')
 
     swap_model = models.Swap(
-        id=int(swap.storage.swap_id) - 1,  # type: ignore
+        id=int(swap.storage.swap_id) - 1,
         creator=holder,
         token=token,
         price=swap.parameter.xtz_per_objkt,
