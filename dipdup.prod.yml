@@ -8,6 +8,7 @@ database:
 
 hasura:
   url: http://hasura:8080
+  select_limit: 1000
   admin_secret: ${HASURA_SECRET:-changeme}
   allow_aggregations: false
   camel_case: false
