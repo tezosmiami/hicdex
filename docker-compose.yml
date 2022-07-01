@@ -7,9 +7,9 @@ services:
       - db
     volumes:
       - ./dipdup.yml:/home/dipdup/dipdup.yml
-      - ./dipdup.prod.yml:/home/dipdup/dipdup-prod.yml
+      - ./dipdup.prod.yml:/home/dipdup/dipdup.prod.yml
       - ./data/hicdex-metadata:/home/dipdup/metadata
-    command: ["-c", "dipdup.yml", "-c", "dipdup-prod.yml", "run"]
+    command: ["-c", "dipdup.yml", "-c", "dipdup.prod.yml", "run"]
     restart: unless-stopped
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
