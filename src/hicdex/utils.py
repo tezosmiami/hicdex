@@ -8,6 +8,8 @@ _logger = logging.getLogger(__name__)
 
 
 def clean_null_bytes(string: str) -> str:
+    if string is None:
+        return ''
     if type(string) is dict:
         return json.dumps(string)
     else:

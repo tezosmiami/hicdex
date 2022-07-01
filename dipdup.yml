@@ -57,6 +57,10 @@ datasources:
     kind: tzkt
     url: https://api.tzkt.io
     buffer_size: 2
+  metadata:
+    kind: metadata
+    url: https://metadata.dipdup.net
+    network: mainnet
 
 indexes:
   hen_mainnet:

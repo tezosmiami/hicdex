@@ -48,5 +48,5 @@ async def on_mint(
     seller_holding, _ = await models.TokenHolder.get_or_create(token=token, holder=holder, quantity=int(mint.parameter.amount))
     await seller_holding.save()
 
-    await fix_token_metadata(token)
+    await fix_token_metadata(ctx, token)
     await fix_other_metadata()
