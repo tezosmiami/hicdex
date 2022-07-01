@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from contextlib import suppress
 from pathlib import Path
 
 import aiohttp
@@ -19,9 +20,8 @@ broken_ids = []
 try:
     with open(f'{METADATA_PATH}/broken.json') as broken_list:
         broken_ids = json.load(broken_list)
-except:
-    print(f'Unable to load {METADATA_PATH}/broken.json')
-    pass
+except Exception as exc:
+    _logger.error(f'Unable to load {METADATA_PATH}/broken.json: %s', exc)
 
 
 async def fix_token_metadata(token):
@@ -39,9 +39,7 @@ async def fix_token_metadata(token):
 
 
 async def fix_other_metadata():
-    async for token in models.Token.filter(
-        Q(artifact_uri='') & ~Q(id__in=broken_ids)
-    ).order_by('id'):
+    async for token in models.Token.filter(Q(artifact_uri='') & ~Q(id__in=broken_ids)).order_by('id'):
         fixed = await fix_token_metadata(token)
         if fixed:
             _logger.info(f'fixed metadata for {token.id}')
@@ -64,34 +62,26 @@ async def get_or_create_tag(tag):
 
 async def get_subjkt_metadata(holder):
     failed_attempt = 0
-    try:
-        with open(subjkt_path(holder.address)) as json_file:
-            metadata = json.load(json_file)
-            failed_attempt = metadata.get('__failed_attempt')
-            if failed_attempt and failed_attempt > 1:
-                return {}
-            if not failed_attempt:
-                return metadata
-    except Exception:
-        pass
+    with suppress(Exception), open(subjkt_path(holder.address)) as json_file:
+        metadata = json.load(json_file)
+        failed_attempt = metadata.get('__failed_attempt')
+        if failed_attempt and failed_attempt > 1:
+            return {}
+        if not failed_attempt:
+            return metadata
 
-    data = await fetch_subjkt_metadata_cf_ipfs(holder, failed_attempt)
-
-    return data
+    return await fetch_subjkt_metadata_cf_ipfs(holder, failed_attempt)
 
 
 async def get_metadata(token):
     failed_attempt = 0
-    try:
-        with open(file_path(token.id)) as json_file:
-            metadata = json.load(json_file)
-            failed_attempt = metadata.get('__failed_attempt')
-            if failed_attempt and failed_attempt > 1:
-                return {}
-            if not failed_attempt:
-                return metadata
-    except Exception:
-        pass
+    with suppress(Exception), open(file_path(token.id)) as json_file:
+        metadata = json.load(json_file)
+        failed_attempt = metadata.get('__failed_attempt')
+        if failed_attempt and failed_attempt > 1:
+            return {}
+        if not failed_attempt:
+            return metadata
 
     data = await fetch_metadata_cf_ipfs(token, failed_attempt)
     if data != {}:
@@ -105,7 +95,7 @@ async def get_metadata(token):
 
 
 def normalize_metadata(token, metadata):
-    n = {
+    return {
         '__version': 1,
         'token_id': token.id,
         'symbol': metadata.get('symbol', 'OBJKT'),
@@ -120,8 +110,6 @@ def normalize_metadata(token, metadata):
         'tags': metadata.get('tags', []),
         'extra': {},
     }
-
-    return n
 
 
 def write_subjkt_metadata_file(holder, metadata):

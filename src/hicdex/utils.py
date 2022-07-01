@@ -1,27 +1,27 @@
+import json
 import logging
+from contextlib import suppress
 
 import aiohttp
 
-import json
-
 _logger = logging.getLogger(__name__)
+
 
 def clean_null_bytes(string: str) -> str:
     if type(string) is dict:
-         return json.dumps(string)
+        return json.dumps(string)
     else:
         return ''.join(string.split('\x00'))
 
+
 def fromhex(hexbytes: str) -> str:
-    string = ''
-    try:
-        string = bytes.fromhex(hexbytes).decode()
-    except Exception:
+    string = None
+    with suppress(Exception):
         try:
-            string = bytes.fromhex(hexbytes).decode('latin-1')
+            string = bytes.fromhex(hexbytes).decode()
         except Exception:
-            pass
-    return clean_null_bytes(string)
+            string = bytes.fromhex(hexbytes).decode('latin-1')
+    return clean_null_bytes(string or '')
 
 
 async def http_request(session: aiohttp.ClientSession, method: str, **kwargs):

@@ -138,16 +138,12 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# IDEs
 .vscode
 .idea
 
+# SQLite databases
 *sqlite3*
 
-.noseids
-
-secrets.env
-
-node_modules
-/PGDATA
-
-data
+# Environment variable files
+*.env
