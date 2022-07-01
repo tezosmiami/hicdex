@@ -145,5 +145,8 @@ cython_debug/
 # SQLite databases
 *sqlite3*
 
+# Ignore data/ directory
+data/
+
 # Environment variable files
 *.env
