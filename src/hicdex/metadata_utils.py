@@ -24,8 +24,8 @@ except Exception as exc:
     _logger.error(f'Unable to load {METADATA_PATH}/broken.json: %s', exc)
 
 
-async def fix_token_metadata(token):
-    metadata = await get_metadata(token)
+async def fix_token_metadata(ctx, token):
+    metadata = await get_metadata(ctx, token)
     token.title = get_name(metadata)
     token.description = get_description(metadata)
     token.artifact_uri = get_artifact_uri(metadata)
@@ -38,9 +38,9 @@ async def fix_token_metadata(token):
     return metadata != {}
 
 
-async def fix_other_metadata():
+async def fix_other_metadata(ctx):
     async for token in models.Token.filter(Q(artifact_uri='') & ~Q(id__in=broken_ids)).order_by('id'):
-        fixed = await fix_token_metadata(token)
+        fixed = await fix_token_metadata(ctx, token)
         if fixed:
             _logger.info(f'fixed metadata for {token.id}')
         else:
@@ -70,46 +70,26 @@ async def get_subjkt_metadata(holder):
         if not failed_attempt:
             return metadata
 
-    return await fetch_subjkt_metadata_cf_ipfs(holder, failed_attempt)
+    return await fetch_subjkt_metadata_ipfs(holder, failed_attempt)
 
 
-async def get_metadata(token):
-    failed_attempt = 0
-    with suppress(Exception), open(file_path(token.id)) as json_file:
-        metadata = json.load(json_file)
-        failed_attempt = metadata.get('__failed_attempt')
-        if failed_attempt and failed_attempt > 1:
-            return {}
-        if not failed_attempt:
-            return metadata
+async def get_metadata(ctx, token):
+    # FIXME: hard coded contract
+    metadata_datasource = ctx.get_metadata_datasource('metadata')
+    metadata = await metadata_datasource.get_token_metadata('KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton', token.id)
+    if metadata is not None:
+        _logger.info(f'found metadata for {token.id} from metadata_datasource')
+        return metadata
 
-    data = await fetch_metadata_cf_ipfs(token, failed_attempt)
+    data = await fetch_metadata_ipfs(token)
     if data != {}:
-        _logger.info(f'metadata for {token.id} from IPFS')
+        _logger.info(f'found metadata for {token.id} from IPFS')
     else:
-        data = await fetch_metadata_bcd(token, failed_attempt)
+        data = await fetch_metadata_bcd(token)
         if data != {}:
             _logger.info(f'metadata for {token.id} from BCD')
 
     return data
-
-
-def normalize_metadata(token, metadata):
-    return {
-        '__version': 1,
-        'token_id': token.id,
-        'symbol': metadata.get('symbol', 'OBJKT'),
-        'name': get_name(metadata),
-        'description': get_description(metadata),
-        'artifact_uri': get_artifact_uri(metadata),
-        'display_uri': get_display_uri(metadata),
-        'thumbnail_uri': get_thumbnail_uri(metadata),
-        'formats': get_formats(metadata),
-        'creators': get_creators(metadata),
-        # not cleaned / not lowercased, store as-is
-        'tags': metadata.get('tags', []),
-        'extra': {},
-    }
 
 
 def write_subjkt_metadata_file(holder, metadata):
@@ -117,12 +97,7 @@ def write_subjkt_metadata_file(holder, metadata):
         json.dump(metadata, write_file)
 
 
-def write_metadata_file(token, metadata):
-    with open(file_path(token.id), 'w') as write_file:
-        json.dump(normalize_metadata(token, metadata), write_file)
-
-
-async def fetch_metadata_bcd(token, failed_attempt=0):
+async def fetch_metadata_bcd(token):
     session = aiohttp.ClientSession()
     data = await http_request(
         session,
@@ -136,16 +111,13 @@ async def fetch_metadata_bcd(token, failed_attempt=0):
     ]
     try:
         if data and not isinstance(data[0], list):
-            write_metadata_file(token, data[0])
             return data[0]
-        with open(file_path(token.id), 'w') as write_file:
-            json.dump({'__failed_attempt': failed_attempt + 1}, write_file)
     except FileNotFoundError:
         pass
     return {}
 
 
-async def fetch_subjkt_metadata_cf_ipfs(holder, failed_attempt=0):
+async def fetch_subjkt_metadata_ipfs(holder, failed_attempt=0):
     addr = holder.metadata_file.replace('ipfs://', '')
     try:
         session = aiohttp.ClientSession()
@@ -161,17 +133,14 @@ async def fetch_subjkt_metadata_cf_ipfs(holder, failed_attempt=0):
     return {}
 
 
-async def fetch_metadata_cf_ipfs(token, failed_attempt=0):
+async def fetch_metadata_ipfs(token):
     addr = token.metadata.replace('ipfs://', '')
     try:
         session = aiohttp.ClientSession()
         data = await http_request(session, 'get', url=f'{IPFS_API}/{addr}', timeout=10)
         await session.close()
         if data and not isinstance(data, list):
-            write_metadata_file(token, data)
             return data
-        with open(file_path(token.id), 'w') as write_file:
-            json.dump({'__failed_attempt': failed_attempt + 1}, write_file)
     except Exception:
         await session.close()
     return {}
@@ -209,25 +178,6 @@ def get_display_uri(metadata):
 
 def get_thumbnail_uri(metadata):
     return clean_null_bytes(metadata.get('thumbnail_uri', '') or metadata.get('thumbnailUri', ''))
-
-
-def get_formats(metadata):
-    return metadata.get('formats', [])
-
-
-def get_creators(metadata):
-    return [clean_null_bytes(x) for x in metadata.get('creators', [])]
-
-
-def get_creator(metadata):
-    return [clean_null_bytes(x) for x in metadata.get('creator', [])]
-
-
-def file_path(token_id: str):
-    token_id_int = int(token_id)
-    lvl2 = token_id_int % 10
-    lvl1 = int((token_id_int % 100 - lvl2) / 10)
-    return f'{METADATA_PATH}/{lvl1}/{lvl2}/{token_id}.json'
 
 
 def subjkt_path(addr: str):
