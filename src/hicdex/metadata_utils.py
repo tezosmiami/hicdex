@@ -78,6 +78,8 @@ async def get_metadata(ctx, token):
     metadata_datasource = ctx.get_metadata_datasource('metadata')
     metadata = await metadata_datasource.get_token_metadata('KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton', token.id)
     if metadata is not None:
+        if isinstance(metadata, str):
+            metadata = json.loads(metadata)
         _logger.info(f'found metadata for {token.id} from metadata_datasource')
         return metadata
 
