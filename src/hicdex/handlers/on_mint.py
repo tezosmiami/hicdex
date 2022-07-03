@@ -50,4 +50,3 @@ async def on_mint(
 
     if not token.artifact_uri and not token.title:
         await fix_token_metadata(ctx, token)
-

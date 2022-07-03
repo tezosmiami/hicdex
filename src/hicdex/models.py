@@ -141,5 +141,3 @@ class Trade(Model):
     ophash = fields.CharField(51)
     level = fields.BigIntField()
     timestamp = fields.DatetimeField()
-
-
