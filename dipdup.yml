@@ -48,29 +48,15 @@ contracts:
   SPLIT_sign:
     address: KT1BcLnWRziLDNJNRn3phAANKrEBiXhytsMY
     typename: split_sign
-  OBJKTBID_english:
-    address: KT1Wvk8fon9SgNEPQKewoSL2ziGGuCQebqZc
-    typename: objktbid_english
-  OBJKTBID_english_v2:
-    address: KT1XjcRq5MLAzMKQ3UHsrue2SeU2NbxUrzmU
-    typename: objktbid_english
-  OBJKTBID_dutch:
-    address: KT1ET45vnyEFMLS9wX1dYHEs9aCN3twDEiQw
-    typename: objktbid_dutch
-  OBJKTBID_dutch_v2:
-    address: KT1W8PqJsZcpcAgDQH9SKQSZKvjVbpjUk8Sc
-    typename: objktbid_dutch
-  OBJKTBID_dutch_v3:
-    address: KT1QJ71jypKGgyTNtXjkCAYJZNhCKWiHuT2r
-    typename: objktbid_dutch
-  OBJKTBID_marketplace:
-    address: KT1FvqJwEDWb1Gwc55Jd1jjTHRVWbYKUUpyq
-    typename: objktbid_marketplace
 
 datasources:
   tzkt_mainnet:
     kind: tzkt
     url: https://api.tzkt.io
+  metadata:
+    kind: metadata
+    url: https://metadata.dipdup.net
+    network: mainnet
 
 indexes:
   hen_mainnet:

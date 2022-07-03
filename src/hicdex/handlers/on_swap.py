@@ -2,7 +2,7 @@ from dipdup.context import HandlerContext
 from dipdup.models import Transaction
 
 import hicdex.models as models
-from hicdex.metadata_utils import fix_other_metadata, fix_token_metadata
+from hicdex.metadata_utils import fix_token_metadata
 from hicdex.types.hen_minter.parameter.swap import SwapParameter
 from hicdex.types.hen_minter.storage import HenMinterStorage
 
@@ -34,6 +34,5 @@ async def on_swap(
     )
     await swap_model.save()
 
-    await fix_other_metadata()
     if not token.artifact_uri and not token.title:
-        await fix_token_metadata(token)
+        await fix_token_metadata(ctx, token)
