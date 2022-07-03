@@ -4,5 +4,5 @@ import hicdex
 
 
 class ExampleTest(IsolatedAsyncioTestCase):
-    async def test_example(self):
+    async def test_example(self) -> None:
         assert hicdex

@@ -1,6 +1,7 @@
 import json
 import logging
 from contextlib import suppress
+from typing import Any
 
 import aiohttp
 
@@ -26,13 +27,19 @@ def fromhex(hexbytes: str) -> str:
     return clean_null_bytes(string or '')
 
 
-async def http_request(session: aiohttp.ClientSession, method: str, **kwargs):
+async def http_request(
+    session: aiohttp.ClientSession,
+    method: str,
+    **kwargs: Any,
+) -> Any:
     """Wrapped aiohttp call with preconfigured headers and logging"""
     headers = {
         **kwargs.pop('headers', {}),
         'User-Agent': 'dipdup',
     }
-    request_string = kwargs['url'] + '?' + '&'.join([f'{key}={value}' for key, value in kwargs.get('params', {}).items()])
+    request_string = (
+        kwargs['url'] + '?' + '&'.join([f'{key}={value}' for key, value in kwargs.get('params', {}).items()])
+    )
     _logger.debug('Calling `%s`', request_string)
     async with getattr(session, method)(
         skip_auto_headers={'User-Agent'},
