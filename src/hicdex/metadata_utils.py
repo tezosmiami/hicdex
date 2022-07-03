@@ -78,9 +78,9 @@ async def get_metadata(ctx, token):
     metadata_datasource = ctx.get_metadata_datasource('metadata')
     metadata = await metadata_datasource.get_token_metadata('KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton', token.id)
     if metadata is not None:
-        if isinstance(metadata, str):
-            metadata = json.loads(metadata)
         _logger.info(f'found metadata for {token.id} from metadata_datasource')
+        if isinstance(metadata, str):
+            return json.loads(metadata)
         return metadata
 
     data = await fetch_metadata_ipfs(token)
@@ -111,11 +111,9 @@ async def fetch_metadata_bcd(token):
     data = [
         obj for obj in data if 'symbol' in obj and (obj['symbol'] == 'OBJKT' or obj['contract'] == 'KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton')
     ]
-    try:
+    with contextlib.suppress(FileNotFoundError):
         if data and not isinstance(data[0], list):
             return data[0]
-    except FileNotFoundError:
-        pass
     return {}
 
 
