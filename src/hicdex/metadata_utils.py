@@ -1,7 +1,7 @@
+import contextlib
 import json
 import logging
 import os
-from contextlib import suppress
 from pathlib import Path
 
 import aiohttp
@@ -33,13 +33,18 @@ async def fix_token_metadata(ctx, token):
     token.thumbnail_uri = get_thumbnail_uri(metadata)
     token.mime = get_mime(metadata)
     token.extra = metadata.get('extra', {})
+    token.rights = get_rights(metadata)
+    token.rightUri = get_rights_uri(metadata)
+    token.formats = metadata.get('formats', {})
+    token.language = get_language(metadata)
+    token.attributes = metadata.get('attributes', {})
     await add_tags(token, metadata)
     await token.save()
     return metadata != {}
 
 
 async def fix_other_metadata(ctx):
-    async for token in models.Token.filter(Q(artifact_uri='') & ~Q(id__in=broken_ids)).order_by('id'):
+    async for token in models.Token.filter(Q(artifact_uri='') | Q(rights__isnull=True) & ~Q(id__in=broken_ids)).order_by('id'):
         fixed = await fix_token_metadata(ctx, token)
         if fixed:
             _logger.info(f'fixed metadata for {token.id}')
@@ -164,6 +169,14 @@ def get_name(metadata):
     return clean_null_bytes(metadata.get('name', ''))
 
 
+def get_rights(metadata):
+    return clean_null_bytes(metadata.get('rights', ''))
+
+
+def get_language(metadata):
+    return clean_null_bytes(metadata.get('language', ''))
+
+
 def get_description(metadata):
     return clean_null_bytes(metadata.get('description', ''))
 
@@ -178,6 +191,10 @@ def get_display_uri(metadata):
 
 def get_thumbnail_uri(metadata):
     return clean_null_bytes(metadata.get('thumbnail_uri', '') or metadata.get('thumbnailUri', ''))
+
+
+def get_rights_uri(metadata):
+    return clean_null_bytes(metadata.get('rights_uri', '') or metadata.get('rightsUri', ''))
 
 
 def subjkt_path(addr: str):
