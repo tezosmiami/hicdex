@@ -14,7 +14,9 @@ hasura:
 
 sentry:
   dsn: ${SENTRY_DSN:-""}
-  environment: ${SENTRY_ENVIRONMENT:-dev}
+  environment: ${SENTRY_ENVIRONMENT:-""}
+  server_name: ${SENTRY_SERVER_NAME:-""}
+  release: ${SENTRY_RELEASE:-"feat-db-rollback"}
 
 prometheus:
   host: 0.0.0.0
