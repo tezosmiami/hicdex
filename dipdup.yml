@@ -45,6 +45,9 @@ contracts:
   SPLIT_contract_sample_e:
     address: KT1NcoBQJ5PbGNWCcchhKeYdopvmvugZdeCg
     typename: split_contract_b
+  SPLIT_contract_sample_f:
+    address: KT1SDPuVqjsuRNDUKemXYyadTHHrDJy1sqjc
+    typename: split_contract_b
   SPLIT_sign:
     address: KT1BcLnWRziLDNJNRn3phAANKrEBiXhytsMY
     typename: split_sign
@@ -219,3 +222,7 @@ indexes:
         pattern:
           - type: origination
             similar_to: SPLIT_contract_sample_e
+      - callback: on_split_contract_origination_a
+        pattern:
+          - type: origination
+            similar_to: SPLIT_contract_sample_f

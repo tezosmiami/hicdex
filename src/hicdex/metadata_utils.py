@@ -81,6 +81,8 @@ async def get_metadata(ctx: DipDupContext, token: models.Token) -> Dict[str, Any
     metadata = await metadata_datasource.get_token_metadata('KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton', token.id)
     if metadata is not None:
         _logger.info(f'found metadata for {token.id} from metadata_datasource')
+        if isinstance(metadata, str):
+            return json.loads(metadata)
         return metadata
 
     data = await fetch_metadata_ipfs(token)

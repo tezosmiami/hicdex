@@ -1,7 +1,8 @@
 from datetime import datetime
 from enum import Enum, IntEnum
 
-from tortoise import ForeignKeyFieldInstance, Model, fields
+from dipdup.models import Model
+from tortoise import ForeignKeyFieldInstance, fields
 
 
 class SwapStatus(IntEnum):
