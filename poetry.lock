@@ -308,7 +308,7 @@ toml = ["tomli (>=1.2.1)"]
 
 [[package]]
 name = "dipdup"
-version = "5.2.2"
+version = "5.2.3"
 description = "Python SDK for developing indexers of Tezos smart contracts inspired by The Graph"
 category = "main"
 optional = false
@@ -344,7 +344,7 @@ pytezos = ["pytezos (>=3.5.2,<4.0.0)"]
 type = "git"
 url = "https://github.com/dipdup-net/dipdup-py.git"
 reference = "feat/db-rollback"
-resolved_reference = "2bb292b62bf7c98b0984f83430f1975e3ce7eb87"
+resolved_reference = "117a067da106e44029e6e45c88d0c6e37335ed59"
 
 [[package]]
 name = "dnspython"
