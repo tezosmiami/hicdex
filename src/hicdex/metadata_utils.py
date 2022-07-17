@@ -35,13 +35,20 @@ async def fix_token_metadata(ctx: DipDupContext, token: models.Token) -> bool:
     token.thumbnail_uri = get_thumbnail_uri(metadata)
     token.mime = get_mime(metadata)
     token.extra = metadata.get('extra', {})
+    token.rights = get_rights(metadata)
+    token.rights_uri = get_rights_uri(metadata)
+    token.formats = metadata.get('formats', {})
+    token.language = get_language(metadata)
+    token.attributes = metadata.get('attributes', {})
     await add_tags(token, metadata)
     await token.save()
     return metadata != {}
 
 
 async def fix_other_metadata(ctx: DipDupContext) -> None:
-    async for token in models.Token.filter(Q(artifact_uri='') & ~Q(id__in=broken_ids)).order_by('id'):
+    async for token in models.Token.filter(
+        Q(artifact_uri='') | Q(rights__isnull=True) & ~Q(id__in=broken_ids)
+    ).order_by('id'):
         fixed = await fix_token_metadata(ctx, token)
         if fixed:
             _logger.info(f'fixed metadata for {token.id}')
@@ -168,6 +175,14 @@ def get_name(metadata: Dict[str, Any]) -> str:
     return clean_null_bytes(metadata.get('name', ''))
 
 
+def get_rights(metadata: Dict[str, Any]) -> str:
+    return clean_null_bytes(metadata.get('rights', ''))
+
+
+def get_language(metadata: Dict[str, Any]) -> str:
+    return clean_null_bytes(metadata.get('language', ''))
+
+
 def get_description(metadata: Dict[str, Any]) -> str:
     return clean_null_bytes(metadata.get('description', ''))
 
@@ -182,6 +197,10 @@ def get_display_uri(metadata: Dict[str, Any]) -> str:
 
 def get_thumbnail_uri(metadata: Dict[str, Any]) -> str:
     return clean_null_bytes(metadata.get('thumbnail_uri', '') or metadata.get('thumbnailUri', ''))
+
+
+def get_rights_uri(metadata: Dict[str, Any]) -> str:
+    return clean_null_bytes(metadata.get('rights_uri', '') or metadata.get('rightsUri', ''))
 
 
 def subjkt_path(addr: str) -> str:

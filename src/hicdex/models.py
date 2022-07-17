@@ -69,6 +69,12 @@ class Token(Model):
 
     creator_id: str
 
+    rights = fields.TextField(default='')
+    rights_uri = fields.TextField(default='')
+    formats = fields.JSONField(default={})
+    language = fields.TextField(default='')
+    attributes = fields.JSONField(default={})
+
 
 class TokenOperator(Model):
     token: ForeignKeyFieldInstance[Token] = fields.ForeignKeyField('models.Token', 'operators', null=False, index=True)
