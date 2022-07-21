@@ -1,7 +1,7 @@
-import contextlib
 import json
 import logging
 import os
+from contextlib import suppress
 from pathlib import Path
 
 import aiohttp
@@ -116,7 +116,7 @@ async def fetch_metadata_bcd(token):
     data = [
         obj for obj in data if 'symbol' in obj and (obj['symbol'] == 'OBJKT' or obj['contract'] == 'KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton')
     ]
-    with contextlib.suppress(FileNotFoundError):
+    with suppress(FileNotFoundError):
         if data and not isinstance(data[0], list):
             return data[0]
     return {}
