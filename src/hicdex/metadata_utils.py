@@ -34,7 +34,7 @@ async def fix_token_metadata(ctx, token):
     token.mime = get_mime(metadata)
     token.extra = metadata.get('extra', {})
     token.rights = get_rights(metadata)
-    token.rightUri = get_rights_uri(metadata)
+    token.right_uri = get_right_uri(metadata)
     token.formats = metadata.get('formats', {})
     token.language = get_language(metadata)
     token.attributes = metadata.get('attributes', {})
@@ -194,8 +194,8 @@ def get_thumbnail_uri(metadata):
     return clean_null_bytes(metadata.get('thumbnail_uri', '') or metadata.get('thumbnailUri', ''))
 
 
-def get_rights_uri(metadata):
-    return clean_null_bytes(metadata.get('rights_uri', '') or metadata.get('rightsUri', ''))
+def get_right_uri(metadata):
+    return clean_null_bytes(metadata.get('right_uri', '') or metadata.get('rightUri', ''))
 
 
 def subjkt_path(addr: str):
