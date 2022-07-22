@@ -1,7 +1,7 @@
-import contextlib
 import json
 import logging
 import os
+from contextlib import suppress
 from pathlib import Path
 
 import aiohttp
@@ -44,6 +44,7 @@ async def fix_token_metadata(ctx, token):
 
 
 async def fix_other_metadata(ctx):
+    _logger.info(f'running fix_missing_metadata job')
     async for token in models.Token.filter(Q(artifact_uri='') | Q(rights__isnull=True) & ~Q(id__in=broken_ids)).order_by('id'):
         fixed = await fix_token_metadata(ctx, token)
         if fixed:
@@ -116,7 +117,7 @@ async def fetch_metadata_bcd(token):
     data = [
         obj for obj in data if 'symbol' in obj and (obj['symbol'] == 'OBJKT' or obj['contract'] == 'KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton')
     ]
-    with contextlib.suppress(FileNotFoundError):
+    with suppress(FileNotFoundError):
         if data and not isinstance(data[0], list):
             return data[0]
     return {}
