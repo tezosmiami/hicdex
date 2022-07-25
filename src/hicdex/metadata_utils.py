@@ -36,7 +36,7 @@ async def fix_token_metadata(ctx: DipDupContext, token: models.Token) -> bool:
     token.mime = get_mime(metadata)
     token.extra = metadata.get('extra', {})
     token.rights = get_rights(metadata)
-    token.rights_uri = get_rights_uri(metadata)
+    token.right_uri = get_right_uri(metadata)
     token.formats = metadata.get('formats', {})
     token.language = get_language(metadata)
     token.attributes = metadata.get('attributes', {})
@@ -46,6 +46,7 @@ async def fix_token_metadata(ctx: DipDupContext, token: models.Token) -> bool:
 
 
 async def fix_other_metadata(ctx: DipDupContext) -> None:
+    _logger.info(f'running fix_missing_metadata job')
     async for token in models.Token.filter(
         Q(artifact_uri='') | Q(rights__isnull=True) & ~Q(id__in=broken_ids)
     ).order_by('id'):
@@ -199,8 +200,8 @@ def get_thumbnail_uri(metadata: Dict[str, Any]) -> str:
     return clean_null_bytes(metadata.get('thumbnail_uri', '') or metadata.get('thumbnailUri', ''))
 
 
-def get_rights_uri(metadata: Dict[str, Any]) -> str:
-    return clean_null_bytes(metadata.get('rights_uri', '') or metadata.get('rightsUri', ''))
+def get_right_uri(metadata: Dict[str, Any]) -> str:
+    return clean_null_bytes(metadata.get('right_uri', '') or metadata.get('rightUri', ''))
 
 
 def subjkt_path(addr: str) -> str:

@@ -58,7 +58,7 @@ datasources:
     url: https://api.tzkt.io
   metadata:
     kind: metadata
-    url: https://metadata.dipdup.net
+    url: https://api-metadata.teia.rocks
     network: mainnet
 
 indexes:
@@ -226,3 +226,12 @@ indexes:
         pattern:
           - type: origination
             similar_to: SPLIT_contract_sample_f
+
+hooks:
+  fix_missing_metadata:
+    callback: fix_missing_metadata
+
+jobs:
+  fix_missing_metadata:
+    hook: fix_missing_metadata
+    interval: 600

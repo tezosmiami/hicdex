@@ -70,7 +70,7 @@ class Token(Model):
     creator_id: str
 
     rights = fields.TextField(default='')
-    rights_uri = fields.TextField(default='')
+    right_uri = fields.TextField(default='')
     formats = fields.JSONField(default={})
     language = fields.TextField(default='')
     attributes = fields.JSONField(default={})
