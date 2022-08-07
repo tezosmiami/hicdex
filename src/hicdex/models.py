@@ -72,6 +72,9 @@ class Token(Model):
     language = fields.TextField(default='')
     attributes = fields.JSONField(default={})
 
+    accessibility = fields.JSONField(default={})
+    content_rating = fields.TextField(default='')
+
 
 class TokenOperator(Model):
     token: ForeignKeyFieldInstance[Token] = fields.ForeignKeyField('models.Token', 'operators', null=False, index=True)

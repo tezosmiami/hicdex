@@ -38,6 +38,8 @@ async def fix_token_metadata(ctx, token):
     token.formats = metadata.get('formats', {})
     token.language = get_language(metadata)
     token.attributes = metadata.get('attributes', {})
+    token.content_rating = get_content_rating(metadata)
+    token.accessibility = metadata.get('accessibility', {})
     await add_tags(token, metadata)
     await token.save()
     return metadata != {}
@@ -172,6 +174,10 @@ def get_name(metadata):
 
 def get_rights(metadata):
     return clean_null_bytes(metadata.get('rights', ''))
+
+
+def get_content_rating(metadata):
+    return clean_null_bytes(metadata.get('contentRating', ''))
 
 
 def get_language(metadata):
