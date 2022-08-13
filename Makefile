@@ -39,7 +39,7 @@ flake:          ## Lint with flake8
 	poetry run flakeheaven lint src tests
 
 mypy:           ## Lint with mypy
-	poetry run mypy src tests
+	poetry run mypy --disallow-untyped-defs src tests
 
 cover:          ## Print coverage for the current branch
 	poetry run diff-cover --compare-branch `git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'` coverage.xml

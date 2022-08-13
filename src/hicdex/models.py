@@ -1,7 +1,8 @@
 from datetime import datetime
 from enum import Enum, IntEnum
 
-from tortoise import ForeignKeyFieldInstance, Model, fields
+from dipdup.models import Model
+from tortoise import ForeignKeyFieldInstance, fields
 
 
 class SwapStatus(IntEnum):
@@ -37,7 +38,9 @@ class SplitContract(Model):
 
 
 class Shareholder(Model):
-    split_contract: ForeignKeyFieldInstance[Holder] = fields.ForeignKeyField('models.SplitContract', 'shareholder', index=True)
+    split_contract: ForeignKeyFieldInstance[Holder] = fields.ForeignKeyField(
+        'models.SplitContract', 'shareholder', index=True
+    )
     holder: ForeignKeyFieldInstance[Holder] = fields.ForeignKeyField('models.Holder', 'shareholder', index=True)
     shares = fields.BigIntField()
     holder_type = fields.CharEnumField(ShareholderStatus, default=ShareholderStatus.unspecified)
@@ -93,15 +96,21 @@ class TagModel(Model):
 
 class TokenTag(Model):
     token: ForeignKeyFieldInstance[Token] = fields.ForeignKeyField('models.Token', 'token_tags', null=False, index=True)
-    tag: ForeignKeyFieldInstance[TagModel] = fields.ForeignKeyField('models.TagModel', 'tag_tokens', null=False, index=True)
+    tag: ForeignKeyFieldInstance[TagModel] = fields.ForeignKeyField(
+        'models.TagModel', 'tag_tokens', null=False, index=True
+    )
 
     class Meta:
         table = 'token_tag'
 
 
 class TokenHolder(Model):
-    holder: ForeignKeyFieldInstance[Holder] = fields.ForeignKeyField('models.Holder', 'holders_token', null=False, index=True)
-    token: ForeignKeyFieldInstance[Token] = fields.ForeignKeyField('models.Token', 'token_holders', null=False, index=True)
+    holder: ForeignKeyFieldInstance[Holder] = fields.ForeignKeyField(
+        'models.Holder', 'holders_token', null=False, index=True
+    )
+    token: ForeignKeyFieldInstance[Token] = fields.ForeignKeyField(
+        'models.Token', 'token_holders', null=False, index=True
+    )
     quantity = fields.BigIntField(default=0)
 
     class Meta:
@@ -109,8 +118,12 @@ class TokenHolder(Model):
 
 
 class Signatures(Model):
-    token: ForeignKeyFieldInstance[Token] = fields.ForeignKeyField('models.Token', 'token_signatures', null=False, index=True)
-    holder: ForeignKeyFieldInstance[Holder] = fields.ForeignKeyField('models.Holder', 'holder_signatures', null=False, index=True)
+    token: ForeignKeyFieldInstance[Token] = fields.ForeignKeyField(
+        'models.Token', 'token_signatures', null=False, index=True
+    )
+    holder: ForeignKeyFieldInstance[Holder] = fields.ForeignKeyField(
+        'models.Holder', 'holder_signatures', null=False, index=True
+    )
 
     holder_id: str
 
