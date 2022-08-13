@@ -40,6 +40,8 @@ async def fix_token_metadata(ctx: DipDupContext, token: models.Token) -> bool:
     token.formats = metadata.get('formats', {})
     token.language = get_language(metadata)
     token.attributes = metadata.get('attributes', {})
+    token.content_rating = get_content_rating(metadata)
+    token.accessibility = metadata.get('accessibility', {})
     await add_tags(token, metadata)
     await token.save()
     return metadata != {}
@@ -178,6 +180,10 @@ def get_name(metadata: Dict[str, Any]) -> str:
 
 def get_rights(metadata: Dict[str, Any]) -> str:
     return clean_null_bytes(metadata.get('rights', ''))
+
+
+def get_content_rating(metadata):
+    return clean_null_bytes(metadata.get('contentRating', ''))
 
 
 def get_language(metadata: Dict[str, Any]) -> str:
