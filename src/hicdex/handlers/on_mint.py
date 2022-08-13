@@ -45,7 +45,11 @@ async def on_mint(
     )
     await token.save()
 
-    seller_holding, _ = await models.TokenHolder.get_or_create(token=token, holder=holder, quantity=int(mint.parameter.amount))
+    seller_holding, _ = await models.TokenHolder.get_or_create(
+        token=token,
+        holder=holder,
+        quantity=int(mint.parameter.amount),
+    )
     await seller_holding.save()
 
     if not token.artifact_uri and not token.title:

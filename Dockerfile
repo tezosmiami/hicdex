@@ -1,3 +1,3 @@
-FROM dipdup/dipdup:5.2
+FROM dipdup/dipdup:6.0.0
 COPY . .
 RUN inject_pyproject

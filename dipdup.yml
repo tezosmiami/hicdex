@@ -3,9 +3,6 @@ package: hicdex
 
 advanced:
   early_realtime: True
-  reindex:
-    manual: ignore
-    schema_modified: ignore
     
 database:
   kind: sqlite
@@ -59,7 +56,6 @@ datasources:
   tzkt_mainnet:
     kind: tzkt
     url: https://api.tzkt.io
-    buffer_size: 2
   metadata:
     kind: metadata
     url: https://api-metadata.teia.rocks

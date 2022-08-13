@@ -10,7 +10,10 @@ async def on_cancel_swap_henc(
     ctx: HandlerContext,
     cancel_swap: Transaction[CancelSwapParameter, HencSwapStorage],
 ) -> None:
-    swap = await models.Swap.filter(id=int(cancel_swap.parameter.__root__), contract_address=cancel_swap.data.target_address).get()
+    swap = await models.Swap.filter(
+        id=int(cancel_swap.parameter.__root__),
+        contract_address=cancel_swap.data.target_address,
+    ).get()
     swap.status = models.SwapStatus.CANCELED
     swap.level = cancel_swap.data.level
     await swap.save()
