@@ -182,7 +182,7 @@ def get_rights(metadata: Dict[str, Any]) -> str:
     return clean_null_bytes(metadata.get('rights', ''))
 
 
-def get_content_rating(metadata):
+def get_content_rating(metadata: Dict[str, Any]) -> str:
     return clean_null_bytes(metadata.get('contentRating', ''))
 
 
