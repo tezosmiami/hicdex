@@ -47,7 +47,6 @@ async def fix_subjkt_metadata(ctx: DipDupContext, holder: models.Holder) -> bool
     if isinstance(metadata, str):
         metadata = json.loads(metadata)
 
-    _logger.info(f'{metadata}')
     if isinstance(metadata, bytes):
         _logger.info(f'invalid metadata: {metadata}')
         return False
