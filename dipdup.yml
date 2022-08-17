@@ -60,6 +60,16 @@ datasources:
     kind: metadata
     url: https://api-metadata.teia.rocks
     network: mainnet
+  ipfs:
+    kind: ipfs
+    url: https://nftstorage.link/ipfs
+    http:
+      retry_count: 5
+      retry_sleep: 1
+      batch_size: 10
+  bcd:
+    kind: http
+    url: https://api.better-call.dev/v1
 
 indexes:
   hen_mainnet:
@@ -234,4 +244,4 @@ hooks:
 jobs:
   fix_missing_metadata:
     hook: fix_missing_metadata
-    interval: 600
+    interval: 300

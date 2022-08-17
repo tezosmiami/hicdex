@@ -12,22 +12,17 @@ from tortoise.expressions import Q
 import hicdex.models as models
 from hicdex.utils import clean_null_bytes, http_request
 
-METADATA_PATH = '/home/dipdup/metadata/tokens'
-SUBJKT_PATH = '/home/dipdup/metadata/subjkts'
-IPFS_API = os.environ.get('IPFS_API', 'https://cloudflare-ipfs.com/ipfs/')
-
 _logger = logging.getLogger(__name__)
-
-broken_ids = []
-try:
-    with open(f'{METADATA_PATH}/broken.json') as broken_list:
-        broken_ids = json.load(broken_list)
-except Exception as exc:
-    _logger.error(f'Unable to load {METADATA_PATH}/broken.json: %s', exc)
 
 
 async def fix_token_metadata(ctx: DipDupContext, token: models.Token) -> bool:
     metadata = await get_metadata(ctx, token)
+    if isinstance(metadata, str):
+        metadata = json.loads(metadata)
+
+    if isinstance(metadata, bytes):
+        return False
+
     token.title = get_name(metadata)
     token.description = get_description(metadata)
     token.artifact_uri = get_artifact_uri(metadata)
@@ -47,17 +42,40 @@ async def fix_token_metadata(ctx: DipDupContext, token: models.Token) -> bool:
     return metadata != {}
 
 
+async def fix_subjkt_metadata(ctx: DipDupContext, holder: models.Holder) -> bool:
+    metadata = await fetch_metadata_ipfs(ctx, holder.metadata_file)
+    if isinstance(metadata, str):
+        metadata = json.loads(metadata)
+
+    _logger.info(f'{metadata}')
+    if isinstance(metadata, bytes):
+        _logger.info(f'invalid metadata: {metadata}')
+        return False
+
+    holder.metadata = metadata
+    holder.description = metadata.get('description', {})
+
+    await holder.save()
+    return metadata != {}
+
+
 async def fix_other_metadata(ctx: DipDupContext) -> None:
     _logger.info(f'running fix_missing_metadata job')
-    async for token in models.Token.filter(
-        Q(artifact_uri='') | Q(rights__isnull=True) & ~Q(id__in=broken_ids)
-    ).order_by('id'):
+    async for token in models.Token.filter(Q(artifact_uri='') | Q(rights__isnull=True)).order_by('-id'):
         fixed = await fix_token_metadata(ctx, token)
         if fixed:
             _logger.info(f'fixed metadata for {token.id}')
         else:
             _logger.info(f'failed to fix metadata for {token.id}')
-            broken_ids.append(token.id)
+
+
+async def fix_holder_metadata(ctx: DipDupContext) -> None:
+    async for holder in models.Holder.filter(~Q(metadata_file='') & Q(metadata='{}')):
+        fixed = await fix_subjkt_metadata(ctx, holder)
+        if fixed:
+            _logger.info(f'fixed metadata for {holder.address}')
+        else:
+            _logger.info(f'failed to fix metadata for {holder.address}')
 
 
 async def add_tags(token: models.Token, metadata: Dict[str, Any]) -> None:
@@ -72,91 +90,57 @@ async def get_or_create_tag(tag: str) -> models.TagModel:
     return tag_model
 
 
-async def get_subjkt_metadata(holder: models.Holder) -> Dict[str, Any]:
-    failed_attempt = 0
-    with suppress(Exception), open(subjkt_path(holder.address)) as json_file:
-        metadata = json.load(json_file)
-        failed_attempt = metadata.get('__failed_attempt')
-        if failed_attempt and failed_attempt > 1:
-            return {}
-        if not failed_attempt:
-            return metadata
-
-    return await fetch_subjkt_metadata_ipfs(holder, failed_attempt)
-
-
 async def get_metadata(ctx: DipDupContext, token: models.Token) -> Dict[str, Any]:
     # FIXME: hard coded contract
     metadata_datasource = ctx.get_metadata_datasource('metadata')
     metadata = await metadata_datasource.get_token_metadata('KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton', token.id)
     if metadata is not None:
         _logger.info(f'found metadata for {token.id} from metadata_datasource')
-        if isinstance(metadata, str):
-            return json.loads(metadata)
         return metadata
 
-    data = await fetch_metadata_ipfs(token)
+    data = await fetch_metadata_ipfs(ctx, token.metadata)
     if data != {}:
         _logger.info(f'found metadata for {token.id} from IPFS')
     else:
-        data = await fetch_metadata_bcd(token)
+        data = await fetch_metadata_bcd(ctx, token)
         if data != {}:
             _logger.info(f'metadata for {token.id} from BCD')
 
     return data
 
 
-def write_subjkt_metadata_file(holder: models.Holder, metadata: Dict[str, Any]) -> None:
-    with open(subjkt_path(holder.address), 'w') as write_file:
-        json.dump(metadata, write_file)
-
-
-async def fetch_metadata_bcd(token: models.Token) -> Dict[str, Any]:
-    session = aiohttp.ClientSession()
-    data = await http_request(
-        session,
-        'get',
-        url=f'https://api.better-call.dev/v1/tokens/mainnet/metadata?contract:KT1Hkg5qeNhfwpKW4fXvq7HGZB9z2EnmCCA9&token_id={token.id}',
+async def fetch_metadata_bcd(ctx: DipDupContext, token: models.Token) -> Dict[str, Any]:
+    api = ctx.get_http_datasource('bcd')
+    data = await api.request(
+        method='get',
+        url=f'tokens/mainnet/metadata?contract:KT1Hkg5qeNhfwpKW4fXvq7HGZB9z2EnmCCA9&token_id={token.id}',
+        weight=1,  # ratelimiter leaky-bucket drops
     )
-    await session.close()
 
     data = [
         obj
         for obj in data
         if 'symbol' in obj and (obj['symbol'] == 'OBJKT' or obj['contract'] == 'KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton')
     ]
+
     with suppress(FileNotFoundError):
         if data and not isinstance(data[0], list):
             return data[0]
     return {}
 
 
-async def fetch_subjkt_metadata_ipfs(holder: models.Holder, failed_attempt: int = 0) -> Dict[str, Any]:
-    addr = holder.metadata_file.replace('ipfs://', '')
-    try:
-        session = aiohttp.ClientSession()
-        data = await http_request(session, 'get', url=f'{IPFS_API}/{addr}', timeout=10)
-        await session.close()
-        if data and not isinstance(data, list):
-            write_subjkt_metadata_file(holder, data)
-            return data
-        with open(subjkt_path(holder.address), 'w') as write_file:
-            json.dump({'__failed_attempt': failed_attempt + 1}, write_file)
-    except Exception:
-        await session.close()
-    return {}
+async def fetch_metadata_ipfs(ctx: DipDupContext, path: str) -> Dict[str, Any]:
+    if not path.startswith('ipfs://'):
+        return {}
 
-
-async def fetch_metadata_ipfs(token: models.Token) -> Dict[str, Any]:
-    addr = token.metadata.replace('ipfs://', '')
     try:
-        session = aiohttp.ClientSession()
-        data = await http_request(session, 'get', url=f'{IPFS_API}/{addr}', timeout=10)
-        await session.close()
+        ipfs_datasource = ctx.get_ipfs_datasource('ipfs')
+        data = await ipfs_datasource.get(path.replace('ipfs://', ''))
         if data and not isinstance(data, list):
             return data
-    except Exception:
-        await session.close()
+    except Exception as e:
+        _logger.error(f'error during ipfs call: {e}')
+
     return {}
 
 
@@ -208,10 +192,3 @@ def get_thumbnail_uri(metadata: Dict[str, Any]) -> str:
 
 def get_right_uri(metadata: Dict[str, Any]) -> str:
     return clean_null_bytes(metadata.get('right_uri', '') or metadata.get('rightUri', ''))
-
-
-def subjkt_path(addr: str) -> str:
-    lvl = addr[-1]
-    folder = f'{SUBJKT_PATH}/{lvl}'
-    Path(folder).mkdir(parents=True, exist_ok=True)
-    return f'{folder}/{addr}.json'
