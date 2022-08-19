@@ -4,6 +4,7 @@ package: hicdex
 advanced:
   early_realtime: True
   merge_subscriptions: True
+  postpone_jobs: True
     
 database:
   kind: sqlite
