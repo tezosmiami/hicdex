@@ -3,6 +3,8 @@ package: hicdex
 
 advanced:
   early_realtime: True
+  merge_subscriptions: True
+  postpone_jobs: True
     
 database:
   kind: sqlite
@@ -60,6 +62,32 @@ datasources:
     kind: metadata
     url: https://api-metadata.teia.rocks
     network: mainnet
+  ipfs:
+    kind: ipfs
+    url: https://ipfs.teia.rocks/ipfs
+    http:
+      retry_count: 1
+      retry_sleep: 1
+      batch_size: 100
+  fallback_ipfs:
+    kind: ipfs
+    url: https://nftstorage.link/ipfs
+    http:
+      retry_count: 2
+      retry_sleep: 1
+      batch_size: 100
+      ratelimit_rate: 200
+      ratelimit_period: 60
+  fallback2_ipfs:
+    kind: ipfs
+    url: https://ipfs.io/ipfs
+    http:
+      retry_count: 2
+      retry_sleep: 1
+      batch_size: 100
+  bcd:
+    kind: http
+    url: https://api.better-call.dev/v1
 
 indexes:
   hen_mainnet:
@@ -234,4 +262,6 @@ hooks:
 jobs:
   fix_missing_metadata:
     hook: fix_missing_metadata
-    interval: 600
+    interval: 300
+
+logging: quiet
