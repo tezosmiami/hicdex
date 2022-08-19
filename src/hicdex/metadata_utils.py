@@ -48,7 +48,7 @@ async def fix_subjkt_metadata(ctx: DipDupContext, holder: models.Holder) -> bool
         metadata = json.loads(metadata)
 
     if isinstance(metadata, bytes):
-        _logger.info(f'invalid metadata: {metadata}')
+        _logger.warning(f'invalid metadata: {metadata}')
         return False
 
     holder.metadata = metadata
@@ -65,7 +65,7 @@ async def fix_other_metadata(ctx: DipDupContext) -> None:
         if fixed:
             _logger.info(f'fixed metadata for {token.id}')
         else:
-            _logger.info(f'failed to fix metadata for {token.id}')
+            _logger.warning(f'failed to fix metadata for {token.id}')
 
 
 async def fix_holder_metadata(ctx: DipDupContext) -> None:
@@ -74,7 +74,7 @@ async def fix_holder_metadata(ctx: DipDupContext) -> None:
         if fixed:
             _logger.info(f'fixed metadata for {holder.address}')
         else:
-            _logger.info(f'failed to fix metadata for {holder.address}')
+            _logger.warning(f'failed to fix metadata for {holder.address}')
 
 
 async def add_tags(token: models.Token, metadata: Dict[str, Any]) -> None:
@@ -128,17 +128,33 @@ async def fetch_metadata_bcd(ctx: DipDupContext, token: models.Token) -> Dict[st
     return {}
 
 
+async def call_ipfs(ctx: DipDupContext, provider: str, path: str) -> Dict[str, Any]:
+    ipfs_datasource = ctx.get_ipfs_datasource(provider)
+    data = await ipfs_datasource.get(path.replace('ipfs://', ''))
+    if data and not isinstance(data, list):
+        return data
+    return {}
+
+
 async def fetch_metadata_ipfs(ctx: DipDupContext, path: str) -> Dict[str, Any]:
     if not path.startswith('ipfs://'):
         return {}
 
     try:
-        ipfs_datasource = ctx.get_ipfs_datasource('ipfs')
-        data = await ipfs_datasource.get(path.replace('ipfs://', ''))
-        if data and not isinstance(data, list):
-            return data
+        _logger.info(f'trying main ipfs url')
+        return await call_ipfs(ctx, 'ipfs', path.replace('ipfs://', ''))
     except Exception as e:
-        _logger.error(f'error during ipfs call: {e}')
+        _logger.warning(f'error during ipfs call: {e}')
+        try:
+            _logger.info(f'trying fallback ipfs url')
+            return await call_ipfs(ctx, 'fallback_ipfs', path.replace('ipfs://', ''))
+        except Exception as e:
+            _logger.warning(f'fallback also borked: {e}')
+            try:
+                _logger.warning(f'last one')
+                return await call_ipfs(ctx, 'fallback2_ipfs', path.replace('ipfs://', ''))
+            except Exception as e:
+                _logger.warning(f'giving up')
 
     return {}
 
