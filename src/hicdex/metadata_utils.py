@@ -61,20 +61,30 @@ async def fix_subjkt_metadata(ctx: DipDupContext, holder: models.Holder) -> bool
 async def fix_other_metadata(ctx: DipDupContext) -> None:
     _logger.info(f'running fix_missing_metadata job')
     async for token in models.Token.filter(Q(artifact_uri='') | Q(rights__isnull=True)).order_by('-id'):
-        fixed = await fix_token_metadata(ctx, token)
-        if fixed:
-            _logger.info(f'fixed metadata for {token.id}')
+        if models.IgnoredCids.get_or_none(cid=token.metadata) is None:
+            fixed = await fix_token_metadata(ctx, token)
+            if fixed:
+                _logger.info(f'fixed metadata for {token.id}')
+            else:
+                _logger.warning(f'failed to fix metadata for {token.id}')
+                # insert into ignored_cids path
+                await models.IgnoredCids.create(cid=token.metadata)
         else:
-            _logger.warning(f'failed to fix metadata for {token.id}')
+            _logger.warning(f'ignoring {token.metadata} for token {token.id}')
 
 
 async def fix_holder_metadata(ctx: DipDupContext) -> None:
     async for holder in models.Holder.filter(~Q(metadata_file='') & Q(metadata='{}')):
-        fixed = await fix_subjkt_metadata(ctx, holder)
-        if fixed:
-            _logger.info(f'fixed metadata for {holder.address}')
+        if models.IgnoredCids.get_or_none(cid=holder.metadata_file) is None:
+            fixed = await fix_subjkt_metadata(ctx, holder)
+            if fixed:
+                _logger.info(f'fixed metadata for {holder.address}')
+            else:
+                _logger.warning(f'failed to fix metadata for {holder.address}')
+                # insert into ignored_cids path
+                await models.IgnoredCids.create(cid=holder.metadata_file)
         else:
-            _logger.warning(f'failed to fix metadata for {holder.address}')
+            _logger.warning(f'ignoring {holder.metadata_file} for holder {holder.address}')
 
 
 async def add_tags(token: models.Token, metadata: Dict[str, Any]) -> None:

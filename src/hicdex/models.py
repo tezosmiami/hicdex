@@ -163,3 +163,7 @@ class Trade(Model):
     ophash = fields.CharField(51)
     level = fields.BigIntField()
     timestamp = fields.DatetimeField()
+
+
+class IgnoredCids(Model):
+    cid = fields.CharField(53, pk=True)

@@ -9,6 +9,10 @@ advanced:
 database:
   kind: sqlite
   path: hic_et_nunc.sqlite3
+  immune_tables:
+    - token_metadata
+    - contract_metadata
+    - ignored_cids
 
 contracts:
   HEN_objkts:
