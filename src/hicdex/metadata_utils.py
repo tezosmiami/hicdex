@@ -63,7 +63,7 @@ async def fix_subjkt_metadata(ctx: DipDupContext, holder: models.Holder) -> bool
 async def fix_other_metadata(ctx: DipDupContext) -> None:
     _logger.info(f'running fix_missing_metadata job')
     async for token in models.Token.filter(Q(artifact_uri='') | Q(rights__isnull=True)).order_by('-id'):
-        if models.IgnoredCids.get_or_none(cid=token.metadata) is None:
+        if await models.IgnoredCids.get_or_none(cid=token.metadata) is None:
             fixed = await fix_token_metadata(ctx, token)
             if fixed:
                 _logger.info(f'fixed metadata for {token.id}')
@@ -77,7 +77,7 @@ async def fix_other_metadata(ctx: DipDupContext) -> None:
 
 async def fix_holder_metadata(ctx: DipDupContext) -> None:
     async for holder in models.Holder.filter(~Q(metadata_file='') & Q(metadata='{}')):
-        if models.IgnoredCids.get_or_none(cid=holder.metadata_file) is None:
+        if await models.IgnoredCids.get_or_none(cid=holder.metadata_file) is None:
             fixed = await fix_subjkt_metadata(ctx, holder)
             if fixed:
                 _logger.info(f'fixed metadata for {holder.address}')
