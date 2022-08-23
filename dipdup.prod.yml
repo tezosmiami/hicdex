@@ -10,7 +10,7 @@ hasura:
   url: http://hasura:8080
   select_limit: 10000
   admin_secret: ${HASURA_SECRET:-changeme}
-  allow_aggregations: false
+  allow_aggregations: true
   camel_case: false
 
 prometheus:
