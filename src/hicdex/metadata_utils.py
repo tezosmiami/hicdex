@@ -104,10 +104,13 @@ async def get_or_create_tag(tag: str) -> models.TagModel:
 async def get_metadata(ctx: DipDupContext, token: models.Token) -> Dict[str, Any]:
     # FIXME: hard coded contract
     metadata_datasource = ctx.get_metadata_datasource('metadata')
-    metadata = await metadata_datasource.get_token_metadata('KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton', token.id)
-    if metadata is not None:
-        _logger.info(f'found metadata for {token.id} from metadata_datasource')
-        return metadata
+    try:
+        metadata = await metadata_datasource.get_token_metadata('KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton', token.id)
+        if metadata is not None:
+            _logger.info(f'found metadata for {token.id} from metadata_datasource')
+            return metadata
+    except Exception as e:
+        _logger.warning(f'error during api-metadata calls: {e}')
 
     data = await fetch_metadata_ipfs(ctx, token.metadata)
     if data != {}:
@@ -122,11 +125,15 @@ async def get_metadata(ctx: DipDupContext, token: models.Token) -> Dict[str, Any
 
 async def fetch_metadata_bcd(ctx: DipDupContext, token: models.Token) -> Dict[str, Any]:
     api = ctx.get_http_datasource('bcd')
-    data = await api.request(
-        method='get',
-        url=f'tokens/mainnet/metadata?contract:KT1Hkg5qeNhfwpKW4fXvq7HGZB9z2EnmCCA9&token_id={token.id}',
-        weight=1,  # ratelimiter leaky-bucket drops
-    )
+    try:
+        data = await api.request(
+            method='get',
+            url=f'tokens/mainnet/metadata?contract:KT1Hkg5qeNhfwpKW4fXvq7HGZB9z2EnmCCA9&token_id={token.id}',
+            weight=1,  # ratelimiter leaky-bucket drops
+        )
+    except Exception as e:
+        _logger.warning(f'error during bcd calls: {e}')
+        return {}
 
     data = [
         obj
