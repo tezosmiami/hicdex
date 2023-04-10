@@ -22,7 +22,7 @@ async def on_split_sign(
         core_participants = await models.Shareholder.filter(
             split_contract=contract, holder_type=models.ShareholderStatus.core_participant
         ).all()
-        sig_required = {shareholder.holder_id for shareholder in core_participants}
+        sig_required = {sharesholder.holder_id for sharesholder in core_participants}
         signers = await models.Signatures.filter(token=token).all()
         sig_created = {signer.holder_id for signer in signers}
 

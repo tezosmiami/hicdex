@@ -68,7 +68,7 @@ datasources:
     network: mainnet
   ipfs:
     kind: ipfs
-    url: https://ipfs.teia.rocks/ipfs
+    url: https://ipfs.io/ipfs
     http:
       retry_count: 1
       retry_sleep: 1
@@ -84,7 +84,7 @@ datasources:
       ratelimit_period: 60
   fallback2_ipfs:
     kind: ipfs
-    url: https://ipfs.io/ipfs
+    url: https://dweb.link/ipfs
     http:
       retry_count: 2
       retry_sleep: 1
@@ -229,19 +229,19 @@ indexes:
       - callback: on_split_contract_origination_a
         pattern:
           - type: origination
-            similar_to: SPLIT_contract_sample_a
+            originated_contract: SPLIT_contract_sample_a
       - callback: on_split_contract_origination_a
         pattern:
           - type: origination
-            similar_to: SPLIT_contract_sample_b
+            originated_contract: SPLIT_contract_sample_b
       - callback: on_split_contract_origination_a
         pattern:
           - type: origination
-            similar_to: SPLIT_contract_sample_c
+            originated_contract: SPLIT_contract_sample_c
       - callback: on_split_contract_origination_a
         pattern:
           - type: origination
-            similar_to: SPLIT_contract_sample_d
+            originated_contract: SPLIT_contract_sample_d
 
   split_contract_b:
     kind: operation
@@ -253,11 +253,11 @@ indexes:
       - callback: on_split_contract_origination_a
         pattern:
           - type: origination
-            similar_to: SPLIT_contract_sample_e
+            originated_contract: SPLIT_contract_sample_e
       - callback: on_split_contract_origination_a
         pattern:
           - type: origination
-            similar_to: SPLIT_contract_sample_f
+            originated_contract: SPLIT_contract_sample_f
 
 hooks:
   fix_missing_metadata:

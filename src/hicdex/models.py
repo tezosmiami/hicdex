@@ -39,9 +39,9 @@ class SplitContract(Model):
 
 class Shareholder(Model):
     split_contract: ForeignKeyFieldInstance[Holder] = fields.ForeignKeyField(
-        'models.SplitContract', 'shareholder', index=True
+        'models.SplitContract', 'sharesholder', index=True
     )
-    holder: ForeignKeyFieldInstance[Holder] = fields.ForeignKeyField('models.Holder', 'shareholder', index=True)
+    holder: ForeignKeyFieldInstance[Holder] = fields.ForeignKeyField('models.Holder', 'sharesholder', index=True)
     shares = fields.BigIntField()
     holder_type = fields.CharEnumField(ShareholderStatus, default=ShareholderStatus.unspecified)
 
