@@ -8,7 +8,7 @@ api.magiccity.live {
 	redir / /graphiql/
 
 	handle_path /*.json {
-		root * /srv/api.hicdex.com
+		root * /srv/api.magiccity.live
 		file_server
 		header Access-Control-Allow-Origin *
 		header Access-Control-Allow-Headers *
@@ -16,7 +16,7 @@ api.magiccity.live {
 	}
 
 	handle_path /cache/*.json {
-		root * /srv/api.hicdex.com
+		root * /srv/api.magiccity.live
 		file_server
 		header Access-Control-Allow-Origin *
 		header Access-Control-Allow-Headers *
