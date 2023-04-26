@@ -65,7 +65,7 @@ class Token(Model):
     is_signed = fields.BooleanField(default=False)
 
     level = fields.BigIntField(default=0)
-    timestamp = fields.DatetimeField(default=datetime.utcnow())
+    timestamp = fields.DatetimeField(auto_now=True)
 
     creator_id: str
 

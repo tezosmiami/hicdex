@@ -7,8 +7,8 @@ services:
       - db
     volumes:
       - ./dipdup.yml:/home/dipdup/dipdup.yml
-      - ./dipdup.prod.yml:/home/dipdup/dipdup.prod.yml
-    command: ["-c", "dipdup.yml", "-c", "dipdup.prod.yml", "run"]
+      - ./dipdup.prod.yml:/home/dipdup/dipdup_prod.yml
+    command: ["-c", "dipdup.yml", "-c", "dipdup_prod.yml", "run"]
     restart: unless-stopped
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
@@ -20,7 +20,7 @@ services:
     image: postgres:14
     shm_size: 6g
     ports:
-      - 6423:5432
+      - 5432:6423
     restart: unless-stopped
     volumes:
       - ./data/pg:/var/lib/postgresql/data
@@ -35,7 +35,7 @@ services:
       retries: 5
 
   hasura:
-    image: hasura/graphql-engine:v2.8.4
+    image: hasura/graphql-engine:v2.23.0
     ports:
       - 8081:8080
     expose:

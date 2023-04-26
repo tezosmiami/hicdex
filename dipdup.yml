@@ -7,12 +7,23 @@ advanced:
   postpone_jobs: True
     
 database:
-  kind: sqlite
-  path: hic_et_nunc.sqlite3
+  kind: postgres
+  host: db
+  port: 5432
+  user: ${POSTGRES_USER:-dipdup}
+  password: ${POSTGRES_PASSWORD:-changeme}
+  database: ${POSTGRES_DB:-dipdup}
   immune_tables:
     - token_metadata
     - contract_metadata
     - ignored_cids
+
+hasura:
+  url: http://hasura:8080
+  select_limit: 10000
+  admin_secret: ${HASURA_SECRET:-changeme}
+  allow_aggregations: true
+  camel_case: false
 
 contracts:
   HEN_objkts:
@@ -268,4 +279,4 @@ jobs:
     hook: fix_missing_metadata
     interval: 300
 
-logging: quiet
+logging: verbose

@@ -1,6 +1,6 @@
-api.hicdex.com {
+api.magiccity.live {
 	handle_path /graphiql* {
-		root * /srv/api.hicdex.com
+		root * /srv/api.magiccity.live
 		file_server
 	}
 
