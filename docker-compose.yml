@@ -86,7 +86,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ../hicdex-graphiql:/srv/api.hicdex.com
+      - ../hicdex-graphiql:/srv/api.magiccity.live
       - ./Caddyfile:/etc/caddy/Caddyfile
       - /opt/caddy_data:/data
       - /opt/caddy_config:/config
