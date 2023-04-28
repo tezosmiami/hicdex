@@ -100,9 +100,6 @@ datasources:
       retry_count: 2
       retry_sleep: 1
       batch_size: 100
-  bcd:
-    kind: http
-    url: https://api.better-call.dev/v1
 
 indexes:
   hen_mainnet:

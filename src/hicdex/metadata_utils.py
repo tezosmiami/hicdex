@@ -1,4 +1,5 @@
 import json
+import asyncio
 import logging
 import os
 from contextlib import suppress
@@ -116,40 +117,41 @@ async def get_metadata(ctx: DipDupContext, token: models.Token) -> Dict[str, Any
     if data != {}:
         _logger.info(f'found metadata for {token.id} from IPFS')
     else:
-        data = await fetch_metadata_bcd(ctx, token)
-        if data != {}:
-            _logger.info(f'metadata for {token.id} from BCD')
-
+        _logger.info(f'metadata for {token.id} not found')
     return data
 
 
-async def fetch_metadata_bcd(ctx: DipDupContext, token: models.Token) -> Dict[str, Any]:
-    api = ctx.get_http_datasource('bcd')
-    try:
-        data = await api.request(
-            method='get',
-            url=f'tokens/mainnet/metadata?contract:KT1Hkg5qeNhfwpKW4fXvq7HGZB9z2EnmCCA9&token_id={token.id}',
-            weight=1,  # ratelimiter leaky-bucket drops
-        )
-    except Exception as e:
-        _logger.warning(f'error during bcd calls: {e}')
-        return {}
+# async def fetch_metadata_bcd(ctx: DipDupContext, token: models.Token) -> Dict[str, Any]:
+#     api = ctx.get_http_datasource('bcd')
+#     try:
+#         data = await api.request(
+#             method='get',
+#             url=f'tokens/mainnet/metadata?contract:KT1Hkg5qeNhfwpKW4fXvq7HGZB9z2EnmCCA9&token_id={token.id}',
+#             weight=1,  # ratelimiter leaky-bucket drops
+#         )
+#     except Exception as e:
+#         _logger.warning(f'error during bcd calls: {e}')
+#         return {}
 
-    data = [
-        obj
-        for obj in data
-        if 'symbol' in obj and (obj['symbol'] == 'OBJKT' or obj['contract'] == 'KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton')
-    ]
+#     data = [
+#         obj
+#         for obj in data
+#         if 'symbol' in obj and (obj['symbol'] == 'OBJKT' or obj['contract'] == 'KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton')
+#     ]
 
-    with suppress(FileNotFoundError):
-        if data and not isinstance(data[0], list):
-            return data[0]
-    return {}
+#     with suppress(FileNotFoundError):
+#         if data and not isinstance(data[0], list):
+#             return data[0]
+#     return {}
 
 
 async def call_ipfs(ctx: DipDupContext, provider: str, path: str) -> Dict[str, Any]:
     ipfs_datasource = ctx.get_ipfs_datasource(provider)
-    data = await ipfs_datasource.get(path.replace('ipfs://', ''))
+    try:
+        coro = ipfs_datasource.get(path.replace('ipfs://', ''))
+        data = await asyncio.wait_for(coro, 60)
+    except asyncio.TimeoutError:
+        data = None
     if data and not isinstance(data, list):
         return data
     return {}
