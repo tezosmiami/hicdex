@@ -2116,14 +2116,14 @@ files = [
 
 [[package]]
 name = "sentry-sdk"
-version = "1.21.0"
+version = "1.21.1"
 description = "Python client for Sentry (https://sentry.io)"
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "sentry-sdk-1.21.0.tar.gz", hash = "sha256:36a1ca082a3065a8a05aafa4b1e3d74e9459d41fbb0bea8a5364caca68626341"},
-    {file = "sentry_sdk-1.21.0-py2.py3-none-any.whl", hash = "sha256:82faf9e2c9eb77401a7a187094b126ca25c2a3a478de6704612f48b3346f7a84"},
+    {file = "sentry-sdk-1.21.1.tar.gz", hash = "sha256:99c15556a23621be9f18c2955f7ce63321713bf1c0ad396b27b61399bac5f458"},
+    {file = "sentry_sdk-1.21.1-py2.py3-none-any.whl", hash = "sha256:092888f3abf7a2ea78f0bfcefc3e0465caee2b6f0efb26f538ccc60f95dca179"},
 ]
 
 [package.dependencies]
@@ -2293,14 +2293,14 @@ files = [
 
 [[package]]
 name = "types-tabulate"
-version = "0.8.11"
+version = "0.9.0.2"
 description = "Typing stubs for tabulate"
 category = "dev"
 optional = false
 python-versions = "*"
 files = [
-    {file = "types-tabulate-0.8.11.tar.gz", hash = "sha256:17a5fa3b5ca453815778fc9865e8ecd0118b07b2b9faff3e2b06fe448174dd5e"},
-    {file = "types_tabulate-0.8.11-py3-none-any.whl", hash = "sha256:af811268241e8fb87b63c052c87d1e329898a93191309d5d42111372232b2e0e"},
+    {file = "types-tabulate-0.9.0.2.tar.gz", hash = "sha256:1dd4322a3a146e9073169c74278b8f14a58eb9905ca9db0d2588df408f27cac9"},
+    {file = "types_tabulate-0.9.0.2-py3-none-any.whl", hash = "sha256:a2e41cc41b6b46bfaec78f8fd8e03058fda7a31af6f203a4b235f5482f571f6f"},
 ]
 
 [[package]]
@@ -2533,4 +2533,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.11"
-content-hash = "4989ff63c25bd2cde75f858756defc661a1b080047d7a491c8c1ef6ef75dc161"
+content-hash = "48d27a43e6b266264886cfd7867ffb1ffcae1319a600d94f41b51b956218f69a"
