@@ -5,9 +5,9 @@ advanced:
   early_realtime: True
   merge_subscriptions: True
   postpone_jobs: True
-    
+  
 database:
-kind: sqlite
+  kind: sqlite
   path: hic_et_nunc.sqlite3
   immune_tables:
     - token_metadata
